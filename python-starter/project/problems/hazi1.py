@@ -42,7 +42,6 @@ class Hazi1(Problem):
             
             return "IGEN" if current_state in accept_states else "NEM"
 
-        # Kizárólag az eredmény (IGEN/NEM) kiírása
         with open(args.output, 'w', encoding='utf-8') as f:
             for word in args.check.split(','):
                 res = evaluate_word(word)
