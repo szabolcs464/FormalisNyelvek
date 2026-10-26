@@ -22,10 +22,12 @@ class Hazi1(Problem):
             print("A bemeneti fájl formátuma érvénytelen.")
             return
 
+        # automata definicio
         alphabet = set(lines[1].split())
         start_state = lines[2]
         accept_states = set(lines[3].split())
 
+        # atmeneti graf
         transitions = {}
         for line in lines[4:]:
             parts = line.split()
@@ -33,6 +35,7 @@ class Hazi1(Problem):
                 src, sym, dst = parts
                 transitions.setdefault(src, {})[sym] = dst
 
+        # szokiertekelo
         def evaluate_word(word):
             current_state = start_state
             for char in word:
