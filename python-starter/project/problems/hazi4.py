@@ -16,21 +16,21 @@ class Hazi4(Problem):
             print("A bemeneti fájl nem található.")
             return
 
-        with open(args.input, 'r', encoding='utf-8') as f:
+        with open(args.input, 'r', encoding='utf-8', errors='replace') as f:
             lines = [re.sub(r'[\r\n]+$', '', line) for line in f]
 
         if args.rgx == 1:
             patterns = [
-                re.compile(r'^10-15 '),
-                re.compile(r'^10-15 10:18:51\.'),
-                re.compile(r'^[0-9-]+ [0-9]{2}:[0-9]{2}:51\.'),
-                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ [IDVEFAW] lowmemorykiller\s*:'),
-                re.compile(r'^[0-9-]+ 10:18:51\.[0-9]+ +221 +[0-9]+ '),
-                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ E '),
-                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ W PackageManager\s*:'),
-                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ D [^:]*ExoPlayer[^:]*:'),
-                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ [EW] .+?\.java:[0-9]+'),
-                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ [IDVEFAW] .+?:.*\bThread\b')
+                re.compile(r'^(?:[0-9]{4}-)?10-15 '),
+                re.compile(r'^(?:[0-9]{4}-)?10-15 10:18:51(?:\.[0-9]+)? '),
+                re.compile(r'^[0-9-]+ [0-9]{2}:[0-9]{2}:51(?:\.[0-9]+)? '),
+                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +[IDVEFAW] +lowmemorykiller\s*:'),
+                re.compile(r'^[0-9-]+ 10:18:51(?:\.[0-9]+)? +221 +[0-9]+ +[IDVEFAW] '),
+                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +E +'),
+                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +W +PackageManager\s*:'),
+                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +D +.*ExoPlayer'),
+                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +[EW] +.+?\.java:'),
+                re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +[IDVEFAW] +[^:]+:.*Thread')
             ]
             counts = [sum(1 for line in lines if p.search(line)) for p in patterns]
             with open(args.output, 'w', encoding='utf-8') as f:
@@ -38,8 +38,8 @@ class Hazi4(Problem):
                     f.write(f"{c}\n")
 
         elif args.rgx == 2:
-            err_msg_re = re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ E .+?: (.*)$')
-            java_file_re = re.compile(r'([A-Za-z0-9_$]+\.java):[0-9]+')
+            err_msg_re = re.compile(r'^[0-9-]+ [0-9:.]+ +[0-9]+ +[0-9]+ +E +.+?:(.*)$')
+            java_file_re = re.compile(r'([A-Za-z0-9_$-]+\.java)(?::[0-9]+)?')
             results = []
             for line in lines:
                 m = err_msg_re.search(line)
@@ -50,7 +50,7 @@ class Hazi4(Problem):
                     f.write(f"{res}\n")
 
         elif args.rgx == 3:
-            pid_re = re.compile(r'^[0-9-]+ [0-9:.]+ +([0-9]+) +[0-9]+ [IDVEFAW] .+?:')
+            pid_re = re.compile(r'^[0-9-]+ [0-9:.]+ +([0-9]+) +[0-9]+ +[IDVEFAW] +.*?:')
             seen = set()
             pids = []
             for line in lines:
@@ -65,7 +65,7 @@ class Hazi4(Problem):
                     f.write(f"{pid}\n")
 
         elif args.rgx == 4:
-            err_pid_re = re.compile(r'^[0-9-]+ [0-9:.]+ +([0-9]+) +[0-9]+ E ')
+            err_pid_re = re.compile(r'^[0-9-]+ [0-9:.]+ +([0-9]+) +[0-9]+ +E +')
             error_counts = {}
             for line in lines:
                 m = err_pid_re.search(line)
@@ -78,7 +78,7 @@ class Hazi4(Problem):
                     f.write(f"PID={max_pid} ({max_count} errors)\n")
 
         elif args.rgx == 5:
-            main_err_re = re.compile(r'^[0-9-]+ [0-9:.]+ +([0-9]+) +\1 E ')
+            main_err_re = re.compile(r'^[0-9-]+ [0-9:.]+ +([0-9]+) +\1 +E +')
             count = sum(1 for line in lines if main_err_re.search(line))
             with open(args.output, 'w', encoding='utf-8') as f:
                 f.write(f"{count}\n")
